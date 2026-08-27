@@ -3,4 +3,8 @@ def addition(a,b):
 
 print(addition(12, 12))
 
+<<<<<<< HEAD
 print("Done and committed")
+=======
+print("Done and dusted")
+>>>>>>> trial-branch
