@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENG-RCA-06: Field Failure Investigation Summary</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --panel:#ffffff;
+      --primary:#123a73;
+      --primary-2:#1f5fbf;
+      --accent:#dfe9ff;
+      --muted:#5a6474;
+      --text:#1b2330;
+      --line:#dfe5ef;
+      --success:#1e7b52;
+      --warning:#b8691b;
+      --danger:#9d2d2d;
+      --shadow:0 14px 34px rgba(17,26,41,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+      background:linear-gradient(180deg,#edf3fb 0%, #f6f9fd 100%);
+      color:var(--text);
+      line-height:1.6;
+    }
+
+    .container{
+      max-width:1180px;
+      margin:30px auto;
+      padding:24px;
+    }
+
+    .topbar{
+      background:linear-gradient(135deg,#0d2447,#184c8d);
+      color:white;
+      padding:28px 32px;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .topbar::after{
+      content:"";
+      position:absolute;
+      inset:0 auto 0 60%;
+      width:35%;
+      background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+      transform:skewX(-20deg);
+    }
+
+    .kicker{
+      font-size:12px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      opacity:.9;
+      margin-bottom:8px;
+      display:inline-block;
+      padding:6px 10px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3.3rem);
+      line-height:1.1;
+      letter-spacing:-.04em;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:16px;
+      font-size:.95rem;
+      opacity:0.96;
+    }
+
+    .meta span{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15);
+      padding:8px 10px;
+      border-radius:999px;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(170px,1fr));
+      gap:18px;
+      margin-top:26px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:20px 18px;
+      box-shadow:var(--shadow);
+    }
+
+    .card .label{
+      color:var(--muted);
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:1.2px;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .card .value{
+      font-weight:700;
+      font-size:1.45rem;
+      color:var(--primary);
+      line-height:1.2;
+    }
+
+    .card .small{
+      margin-top:10px;
+      font-size:.82rem;
+      color:var(--muted);
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:20px 22px;
+      margin-top:26px;
+    }
+
+    .section-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+      border-bottom:2px solid #edf2f8;
+      padding-bottom:8px;
+    }
+
+    .section-header h2{
+      margin:0;
+      font-size:1.55rem;
+      color:var(--primary);
+      letter-spacing:-.03em;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      background:var(--accent);
+      border:1px solid #d5e3ff;
+      border-radius:999px;
+      color:var(--primary);
+      font-size:.78rem;
+      font-weight:700;
+    }
+
+    .badge::before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--primary-2);
+      display:inline-block;
+    }
+
+    p, li{
+      font-size:1rem;
+      color:var(--text);
+    }
+
+    ul{
+      margin:8px 0 0 18px;
+      padding-left:18px;
+    }
+
+    .two-col{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:20px;
+    }
+
+    .stat-box{
+      background:linear-gradient(180deg,#f7faff,#eef4ff);
+      border:1px solid #dfeafc;
+      border-radius:16px;
+      padding:16px 18px;
+    }
+
+    .stat-box h3{
+      margin:0 0 12px;
+      font-size:1.05rem;
+      color:var(--primary);
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(120px,1fr));
+      gap:12px;
+    }
+
+    .mini{
+      background:white;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+    }
+
+    .mini .m-label{
+      color:var(--muted);
+      font-size:.75rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .mini .m-value{
+      margin-top:6px;
+      font-weight:700;
+      font-size:1.2rem;
+      color:var(--primary);
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:560px;
+    }
+
+    th, td{
+      border-bottom:1px solid var(--line);
+      padding:14px 12px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      background:#f7f9fc;
+      color:var(--primary);
+      font-size:.82rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    tr:last-child td{border-bottom:none}
+
+    .highlight{
+      background:linear-gradient(135deg,#edf4ff,#f8fbff);
+      border-left:4px solid var(--primary-2);
+      padding:12px 14px;
+      border-radius:12px;
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .cta{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:22px;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      background:linear-gradient(135deg,#0e2d5d,#235db7);
+      color:#fff;
+      padding:11px 18px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 10px 24px rgba(18,58,115,.22);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    @media print {
+      html, body {
+        background: #ffffff !important;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .topbar,
+      .card,
+      .panel,
+      .stat-box,
+      .mini,
+      .table-wrap,
+      .highlight,
+      .details {
+        box-shadow: none !important;
+      }
+
+      .cta {
+        display: none !important;
+      }
+
+      .panel,
+      .topbar,
+      .card {
+        break-inside: avoid;
+      }
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 28px rgba(18,58,115,.28);
+    }
+
+    .subtle{
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .details{
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fafcff;
+    }
+
+    details{
+      border-bottom:1px solid var(--line);
+    }
+
+    details:last-child{border-bottom:none}
+
+    summary{
+      cursor:pointer;
+      list-style:none;
+      padding:14px 16px;
+      font-weight:700;
+      color:var(--primary);
+      background:#f8fbff;
+    }
+
+    summary::-webkit-details-marker{display:none}
+
+    details[open] summary{
+      background:#edf4ff;
+      border-bottom:1px solid var(--line);
+    }
+
+    details p, details li{
+      padding:0 16px 14px;
+      margin:0;
+    }
+
+    @media (max-width: 900px){
+      .cards{grid-template-columns:repeat(2, minmax(180px,1fr));}
+      .two-col{grid-template-columns:1fr;}
+    }
+
+    @media (max-width: 560px){
+      .cards{grid-template-columns:1fr;}
+      .container{padding:14px}
+      .topbar{padding:24px 20px}
+      .section-header{display:block}
+      .cta{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="kicker">Engineering Investigation</div>
+      <h1>ENG-RCA-06: Field Failure Investigation Summary</h1>
+      <div class="meta">
+        <span>Project ID: ENG-RCA-06</span>
+        <span>Domain: Root Cause Analysis (RCA)</span>
+        <span>System: Industrial Motor Control Unit (MCU)</span>
+      </div>
+    </header>
+
+    <section class="cards">
+      <div class="card">
+        <div class="label">Primary Root Cause</div>
+        <div class="value">Thermal Management</div>
+        <div class="small">Inadequate cooling under prolonged high-temp operation.</div>
+      </div>
+      <div class="card">
+        <div class="label">Observed Failure Rate</div>
+        <div class="value">60%</div>
+        <div class="small">Above 50°C ambient conditions.</div>
+      </div>
+      <div class="card">
+        <div class="label">MTBF</div>
+        <div class="value">18,000 hrs</div>
+        <div class="small">Current baseline before CAPA implementation.</div>
+      </div>
+      <div class="card">
+        <div class="label">Expected Gain</div>
+        <div class="value">>50%</div>
+        <div class="small">Reduction in field failures after corrective actions.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>1. Executive Summary</h2>
+        <span class="badge">Summary</span>
+      </div>
+      <p>
+        This report presents the findings of a field failure investigation conducted on Industrial Motor Control Units (MCUs) used in automated manufacturing systems. Recurring failures were reported in the form of unexpected shutdowns, intermittent fault conditions, communication instability, and loss of motor control functionality. These events adversely affected production continuity, maintenance costs, and long-term product reliability.
+      </p>
+      <p>
+        A structured Root Cause Analysis (RCA) was performed using field failure data, component inspections, environmental assessments, thermal validation testing, and engineering methodologies including 5 Whys Analysis, Fishbone Analysis, Pareto Analysis, Failure Mode and Effects Analysis (FMEA), and Fault Tree Analysis (FTA).
+      </p>
+      <div class="highlight">
+        The investigation concluded that the primary root cause was inadequate thermal management during prolonged operation in elevated-temperature environments. This caused accelerated component degradation, solder joint fatigue, and reduced reliability of critical power electronic assemblies.
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>2. Project Background</h2>
+        <span class="badge">Context</span>
+      </div>
+      <div class="two-col">
+        <div>
+          <p>
+            The MCU is a critical subsystem within industrial automation equipment and is responsible for motor control, protection, and operational stability. It is designed for continuous use in complex manufacturing environments where temperature, duty cycle, and environmental conditions can significantly influence reliability.
+          </p>
+          <p>
+            An increase in customer-reported failures prompted a formal engineering investigation. Preliminary analysis indicated a stronger correlation between failure occurrence and elevated ambient temperatures, resulting in a comprehensive assessment of design, manufacturing, environmental, and operational factors.
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3>Problem Snapshot</h3>
+          <div class="mini-grid">
+            <div class="mini">
+              <div class="m-label">Downtime</div>
+              <div class="m-value">High</div>
+            </div>
+            <div class="mini">
+              <div class="m-label">Warranty</div>
+              <div class="m-value">High</div>
+            </div>
+            <div class="mini">
+              <div class="m-label">Failure Trend</div>
+              <div class="m-value">Rising</div>
+            </div>
+            <div class="mini">
+              <div class="m-label">Risk</div>
+              <div class="m-value">Critical</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>3. Problem Statement</h2>
+        <span class="badge">Issue</span>
+      </div>
+      <ul>
+        <li>Unplanned production downtime.</li>
+        <li>Reduced equipment availability.</li>
+        <li>Increased maintenance interventions.</li>
+        <li>Higher warranty and replacement costs.</li>
+        <li>Diminished customer confidence in reliability.</li>
+      </ul>
+      <p style="margin-top:12px;">
+        The investigation sought to determine whether failure origin was linked to design limitations, manufacturing defects, environmental exposure, maintenance practices, or a combination of factors.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>4. Investigation Methodology</h2>
+        <span class="badge">Method</span>
+      </div>
+      <div class="details">
+        <details open>
+          <summary>Stage 1: Failure Characterization</summary>
+          <p>Reviewed customer complaints, service records, and recurring symptom patterns to identify operational conditions linked to failure.</p>
+        </details>
+        <details>
+          <summary>Stage 2: Evidence Collection</summary>
+          <p>Analyzed failed returns, maintenance history, manufacturing records, field environments, and reliability-related documentation.</p>
+        </details>
+        <details>
+          <summary>Stage 3: Technical Evaluation</summary>
+          <p>Performed visual inspection, electrical testing, thermal assessment, and component-level analysis.</p>
+        </details>
+        <details>
+          <summary>Stage 4: Root Cause Analysis</summary>
+          <p>Applied 5 Whys, Fishbone Analysis, Pareto Analysis, FMEA, and Fault Tree Analysis to evaluate likely causes.</p>
+        </details>
+        <details>
+          <summary>Stage 5: Validation</summary>
+          <p>Used environmental chamber testing and comparative analysis to verify the identified failure mechanism.</p>
+        </details>
+        <details>
+          <summary>Stage 6: CAPA Development</summary>
+          <p>Defined immediate corrective actions, long-term preventive actions, and KPI-based monitoring.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>5. Findings and Evidence</h2>
+        <span class="badge">Findings</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ambient Temperature</th>
+              <th>Units Evaluated</th>
+              <th>Failures</th>
+              <th>Failure Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Below 40°C</td>
+              <td>50</td>
+              <td>4</td>
+              <td>8%</td>
+            </tr>
+            <tr>
+              <td>40°C to 50°C</td>
+              <td>40</td>
+              <td>12</td>
+              <td>30%</td>
+            </tr>
+            <tr>
+              <td>Above 50°C</td>
+              <td>30</td>
+              <td>18</td>
+              <td>60%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:18px;">
+        This trend strongly suggested that temperature exposure was a dominant failure influence. Physical inspection confirmed recurring thermal degradation indicators across returned units.
+      </p>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Observation</th>
+              <th>Occurrence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Thermal discoloration</td><td>76%</td></tr>
+            <tr><td>Solder joint cracking</td><td>68%</td></tr>
+            <tr><td>Thermal interface degradation</td><td>61%</td></tr>
+            <tr><td>Capacitor aging</td><td>54%</td></tr>
+            <tr><td>Connector degradation</td><td>18%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>6. Quantitative Validation</h2>
+        <span class="badge">Validation</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ambient Temperature</th>
+              <th>Internal MCU Temperature</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>25°C</td><td>54°C</td></tr>
+            <tr><td>40°C</td><td>72°C</td></tr>
+            <tr><td>50°C</td><td>88°C</td></tr>
+            <tr><td>55°C</td><td>97°C</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:14px;">
+        The maximum recommended operating temperature was 85°C. At ambient temperatures above 50°C, internal temperatures exceeded the recommended limit, confirming insufficient thermal margin.
+      </p>
+      <div class="highlight" style="margin-top:16px;">
+        This validation established a direct link between elevated ambient temperature and component overheating.
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>7. Root Cause Analysis</h2>
+        <span class="badge">RCA</span>
+      </div>
+      <div class="highlight">
+        Inadequate thermal management within the MCU power electronics design resulted in sustained operation above acceptable thermal limits during prolonged exposure to elevated ambient temperatures.
+      </div>
+      <p style="margin-top:16px;">Failure mechanism:</p>
+      <ul>
+        <li>Elevated ambient temperature</li>
+        <li>Reduced cooling effectiveness</li>
+        <li>Increase in internal operating temperature</li>
+        <li>Accelerated degradation of electronic components and thermal interface materials</li>
+        <li>Solder joint fatigue and electrical instability</li>
+        <li>Power electronics malfunction</li>
+        <li>Loss of MCU functionality and system shutdown</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>8. Corrective and Preventive Actions</h2>
+        <span class="badge">CAPA</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Owner</th>
+              <th>Timeline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Issue thermal operating guidance</td><td>Quality Team</td><td>1 Week</td></tr>
+            <tr><td>Inspect high-risk installations</td><td>Field Service</td><td>2 Weeks</td></tr>
+            <tr><td>Replace degraded thermal materials</td><td>Service Engineering</td><td>3 Weeks</td></tr>
+            <tr><td>Redesign thermal architecture</td><td>Design Engineering</td><td>6 Months</td></tr>
+            <tr><td>Increase thermal safety margins</td><td>Reliability Engineering</td><td>4 Months</td></tr>
+            <tr><td>Implement predictive thermal monitoring</td><td>Controls Engineering</td><td>6 Months</td></tr>
+            <tr><td>Upgrade temperature-rated components</td><td>Component Engineering</td><td>5 Months</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>9. KPI Monitoring</h2>
+        <span class="badge">KPIs</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>KPI</th>
+              <th>Current</th>
+              <th>Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Field Failure Rate</td><td>12.5%</td><td>&lt;6%</td></tr>
+            <tr><td>MTBF</td><td>18,000 hrs</td><td>24,000 hrs</td></tr>
+            <tr><td>Thermal-Related Failures</td><td>52%</td><td>&lt;10%</td></tr>
+            <tr><td>Warranty Claims</td><td>Baseline</td><td>-40%</td></tr>
+            <tr><td>Downtime Events</td><td>Baseline</td><td>-50%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>10. Lessons Learned</h2>
+        <span class="badge">Learning</span>
+      </div>
+      <ul>
+        <li>Thermal margin must reflect real field conditions.</li>
+        <li>Multiple RCA methods improve confidence in findings.</li>
+        <li>Reliability must be designed in early.</li>
+        <li>Data-driven investigation prevents misdiagnosis.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>11. Recommendations</h2>
+        <span class="badge">Action</span>
+      </div>
+      <ul>
+        <li>Redesign the MCU thermal architecture.</li>
+        <li>Increase thermal operating margin by at least 20%.</li>
+        <li>Improve airflow management and heat dissipation capability.</li>
+        <li>Deploy predictive thermal monitoring.</li>
+        <li>Upgrade temperature-sensitive components.</li>
+        <li>Strengthen maintenance inspections of cooling systems.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>12. Conclusion</h2>
+        <span class="badge">Outcome</span>
+      </div>
+      <p>
+        This investigation successfully identified the primary cause of recurring MCU field failures as inadequate thermal management under prolonged high-temperature operating conditions. Evidence from field trend analysis, physical inspections, thermal validation testing, Pareto analysis, Fishbone analysis, and FMEA consistently supported this conclusion.
+      </p>
+      <p>
+        The recommended corrective and preventive actions directly address the identified failure mechanism through enhanced thermal design, improved monitoring capability, stronger maintenance controls, and increased reliability margins. Successful implementation is expected to significantly reduce failure rates, improve equipment availability, increase MTBF, and strengthen customer confidence.
+      </p>
+    </section>
+
+    <div class="cta">
+      <button id="pdfButton" type="button">Export PDF</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('pdfButton').addEventListener('click', function () {
+      window.print();
+    });
+
+    document.querySelectorAll('details').forEach((d) => {
+      d.addEventListener('toggle', () => {
+        if (d.open) {
+          document.querySelectorAll('details').forEach(x => {
+            if (x !== d) x.open = false;
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
